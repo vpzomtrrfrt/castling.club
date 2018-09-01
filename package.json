@@ -1,0 +1,32 @@
+{
+  "name": "castlingclub",
+  "version": "0.1.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "canvas": "2.0.0-alpha.13",
+    "co-body": "^6.0.0",
+    "debug": "^3.1.0",
+    "dotenv": "^6.0.0",
+    "ejs": "^2.6.1",
+    "got": "^9.0.0",
+    "jsonld": "^1.0.2",
+    "koa": "^2.5.2",
+    "koa-router": "^7.4.0",
+    "leven": "^2.1.0",
+    "parse5": "^5.0.0",
+    "pg": "^7.4.3",
+    "uuid": "^3.3.2"
+  },
+  "scripts": {
+    "lint": "eslint src *.js",
+    "test:chess": "mocha tools/chess-tests.js",
+    "test": "npm run lint && npm run test:chess"
+  },
+  "devDependencies": {
+    "chai": "4.1.2",
+    "eslint": "^5.2.0",
+    "mocha": "5.2.0"
+  }
+}

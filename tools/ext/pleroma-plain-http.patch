@@ -1,0 +1,22 @@
+diff --git a/lib/pleroma/web/web_finger/web_finger.ex b/lib/pleroma/web/web_finger/web_finger.ex
+index 9f554d28..e08a4033 100644
+--- a/lib/pleroma/web/web_finger/web_finger.ex
++++ b/lib/pleroma/web/web_finger/web_finger.ex
+@@ -219,7 +219,7 @@ defmodule Pleroma.Web.WebFinger do
+       get_template_from_xml(body)
+     else
+       _ ->
+-        with {:ok, %{body: body}} <- @httpoison.get("https://#{domain}/.well-known/host-meta", []) do
++        with {:ok, %{body: body}} <- @httpoison.get("http://#{domain}/.well-known/host-meta", []) do
+           get_template_from_xml(body)
+         else
+           e -> {:error, "Can't find LRDD template: #{inspect(e)}"}
+@@ -244,7 +244,7 @@ defmodule Pleroma.Web.WebFinger do
+           String.replace(template, "{uri}", URI.encode(account))
+ 
+         _ ->
+-          "https://#{domain}/.well-known/webfinger?resource=acct:#{account}"
++          "http://#{domain}/.well-known/webfinger?resource=acct:#{account}"
+       end
+ 
+     with response <-
