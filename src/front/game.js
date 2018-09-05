@@ -62,6 +62,7 @@ module.exports = async ({
     );
     if (!["Person", "Service", "Application"].includes(otherActor.type)) {
       debug("Challenge to invalid actor type");
+      return;
     }
 
     // Pick sides.
