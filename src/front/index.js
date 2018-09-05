@@ -42,8 +42,7 @@ module.exports = async config => {
   // Setup request handling.
   app.koa.use(app.router.routes()).use(app.router.allowedMethods());
   app.koa.on("error", err => {
-    const status = err.statusCode || err.status;
-    if (typeof status !== "number" || status > 499) {
+    if (typeof err.status !== "number" || err.status > 499) {
       console.error(err);
     }
   });
