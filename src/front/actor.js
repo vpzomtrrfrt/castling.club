@@ -53,6 +53,7 @@ module.exports = async ({
       id: actorUrl,
       type: "Service",
       name: "King",
+      summary: `<p>I'm a bot, hosting games of chess!</p>`,
       preferredUsername: "king",
       inbox: `${origin}/inbox`,
       icon: {
@@ -60,6 +61,13 @@ module.exports = async ({
         mediaType: "image/png",
         url: `${actorUrl}/icon`
       },
+      attachment: [
+        {
+          type: "PropertyValue",
+          name: "Website",
+          value: `<a href="${origin}/">${domain}</a>`
+        }
+      ],
       publicKey: {
         id: publicKeyUrl,
         owner: actorUrl,
