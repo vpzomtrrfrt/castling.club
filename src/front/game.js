@@ -337,13 +337,7 @@ module.exports = async ({
           "I can't make that work, I'm afraid.",
           "Does not compute!",
           "I don't know what to do with that.",
-          "I wish we could go there, friend.",
-          "We'd be breaking some rules if that was allowed!",
-          "Something tells me thats wrong.",
-          "A small misunderstanding.",
-          "Anything but that!",
-          "Are we still playing chess?",
-          "That's some creative thinking there."
+          "A small misunderstanding."
         ]),
         " ",
         sample([
