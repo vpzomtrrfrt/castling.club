@@ -21,16 +21,6 @@ module.exports = ({ jsonld, pg, router, signing }) => {
       ctx.throw(400, "Invalid request body");
     }
 
-    // Deduplicate.
-    const now = new Date();
-    const { rowCount } = await model.tryInsertInboxObject(pg, parsed.id, now);
-    if (rowCount === 0) {
-      debug(`Ignoring duplicate activity: ${parsed.id}`);
-      ctx.status = 202;
-      ctx.body = null;
-      return;
-    }
-
     // Resolve the activity object.
     const resolver = jsonld.createResolver();
     const activity = await resolver.resolve(parsed, ACTIVITY_STREAMS_CONTEXT);
@@ -42,6 +32,16 @@ module.exports = ({ jsonld, pg, router, signing }) => {
     const publicKey = await signing.verify(ctx, raw, resolver);
     if (publicKey.owner !== activity.actor) {
       ctx.throw(400, "Signature does not match actor");
+    }
+
+    // Deduplicate.
+    const now = new Date();
+    const { rowCount } = await model.tryInsertInboxObject(pg, parsed.id, now);
+    if (rowCount === 0) {
+      debug(`Ignoring duplicate activity: ${parsed.id}`);
+      ctx.status = 202;
+      ctx.body = null;
+      return;
     }
 
     // We currently handle just 'Create'.
