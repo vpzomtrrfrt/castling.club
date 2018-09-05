@@ -53,13 +53,20 @@ module.exports = async ({
       return;
     }
 
-    // Resolve the other player actor.
+    // Resolve the other player actor document.
     const otherId = mentions.values().next().value;
     const resolver = jsonld.createResolver();
-    const otherActor = await resolver.resolve(
-      otherId,
-      ACTIVITY_STREAMS_CONTEXT
-    );
+    let otherActor;
+    try {
+      otherActor = await await resolver.resolve(
+        otherId,
+        ACTIVITY_STREAMS_CONTEXT
+      );
+    } catch (err) {
+      console.log(`Failed to resolve challenged actor: ${otherId}`);
+      console.log(`Error: ${err.message}`);
+      return;
+    }
     if (!["Person", "Service", "Application"].includes(otherActor.type)) {
       debug("Challenge to invalid actor type");
       return;

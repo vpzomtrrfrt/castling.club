@@ -17,7 +17,7 @@ module.exports = ({ jsonld, pg, router, signing }) => {
     const { raw, parsed } = await coBody.json(ctx.req, { returnRawBody: true });
 
     // Sanity check.
-    if (!parsed || !parsed.id) {
+    if (!parsed || typeof parsed.id !== "string") {
       ctx.throw(400, "Invalid request body");
     }
 
@@ -27,7 +27,7 @@ module.exports = ({ jsonld, pg, router, signing }) => {
       ctx.throw(400, "Invalid activity ID, not a URL");
     }
 
-    // Resolve the activity object.
+    // Resolve the activity document.
     const resolver = jsonld.createResolver();
     const activity = await resolver.resolve(parsed, ACTIVITY_STREAMS_CONTEXT);
     if (!activity.type || !activity.actor) {
@@ -45,6 +45,14 @@ module.exports = ({ jsonld, pg, router, signing }) => {
       ctx.throw(400, "Activity and actor origins don't match");
     }
 
+    // Resolve the actor document.
+    let actor;
+    try {
+      actor = await resolver.resolve(activity.actor, ACTIVITY_STREAMS_CONTEXT);
+    } catch (err) {
+      ctx.throw(400, `Actor could not be resolved: ${err.message}`);
+    }
+
     // Deduplicate based on activity ID.
     const now = new Date();
     const { rowCount } = await model.tryInsertInboxObject(pg, parsed.id, now);
@@ -57,30 +65,32 @@ module.exports = ({ jsonld, pg, router, signing }) => {
 
     // We currently handle just 'Create'.
     if (activity.type === "Create") {
-      const objectId = activity.object;
-      if (!objectId) {
-        ctx.throw(400, "Missing object in 'create' activity");
+      // The object MUST be included, according to spec.
+      if (typeof parsed.object !== "object") {
+        ctx.throw(400, "Missing object in 'Create' activity");
       }
 
-      const object = await resolver.resolve(objectId, ACTIVITY_STREAMS_CONTEXT);
+      // This should never fail, because the object is included.
+      const object = await resolver.resolve(
+        activity.object,
+        ACTIVITY_STREAMS_CONTEXT
+      );
       if (object.type === "Note") {
         if (object.attributedTo !== activity.actor) {
           ctx.throw(400, "Activity creates note not attributed to the actor");
         }
 
-        // Resolve the actor.
-        object.actor = await resolver.resolve(
-          activity.actor,
-          ACTIVITY_STREAMS_CONTEXT
-        );
-
-        // Extract plain text.
+        // Amend object with convenience props.
+        object.actor = actor;
         object.contentText = html.extractText(object.content);
-
-        // Extract mentions.
         object.mentions = new Set();
         for (const tagId of ensureArray(object.tag)) {
-          const tag = await resolver.resolve(tagId, ACTIVITY_STREAMS_CONTEXT);
+          let tag;
+          try {
+            tag = await resolver.resolve(tagId, ACTIVITY_STREAMS_CONTEXT);
+          } catch (err) {
+            ctx.throw(400, "Invalid object tags");
+          }
           if (tag.type === "Mention") {
             object.mentions.add(tag.href);
           }

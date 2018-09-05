@@ -46,7 +46,7 @@ module.exports = async ({
     const outboxIds = deliveryRows.map(row => row.outboxId);
     assert(outboxIds.includes(outboxId));
 
-    // Try to resolve the actor object.
+    // Try to resolve the actor document.
     let actor;
     try {
       actor = await resolver.resolve(addressee, ACTIVITY_STREAMS_CONTEXT);

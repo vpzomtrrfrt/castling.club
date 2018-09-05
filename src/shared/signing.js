@@ -121,9 +121,14 @@ module.exports = ({ domain }) => {
       }
     }
 
-    // Resolve the JSON-LD key document.
+    // Resolve the JSON-LD public key document.
     // @todo: Support non-RSA keys.
-    const publicKey = await jsonldCtx.resolve(keyId, SECURITY_CONTEXT);
+    let publicKey;
+    try {
+      publicKey = await jsonldCtx.resolve(keyId, SECURITY_CONTEXT);
+    } catch (err) {
+      ctx.throw(400, "Signature public key could not be resolved");
+    }
     if (!publicKey.publicKeyPem) {
       return null;
     }

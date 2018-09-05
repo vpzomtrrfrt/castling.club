@@ -11,6 +11,7 @@ const debug = createDebug("chess:jsonld");
 const isSubjectReference = node =>
   node && node["@id"] && Object.keys(node).length === 1;
 
+// Helper class used to resolve JSON-LD documents.
 class Resolver {
   constructor(jsonld) {
     // A jsonld instance, typically with a caching loader.
