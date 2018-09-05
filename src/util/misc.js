@@ -46,6 +46,12 @@ exports.detach = fn => async (...args) => {
   });
 };
 
+// Get the origin of a URL.
+exports.originOf = url => {
+  const match = /^[a-z][a-z0-9.+-]*:\/\/[^/]+/i.exec(url);
+  return match && match[0];
+};
+
 // Checks that a URL that is supposed to be some resource on the public
 // internet doesn't point to known invalid hosts. We also require HTTPS.
 exports.checkPublicUrl = url => {

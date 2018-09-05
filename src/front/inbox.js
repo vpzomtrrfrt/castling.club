@@ -5,7 +5,7 @@ const EventEmitter = require("events");
 const html = require("../util/html");
 const model = require("../util/model");
 const { ACTIVITY_STREAMS_CONTEXT } = require("../util/consts");
-const { ensureArray } = require("../util/misc");
+const { ensureArray, originOf } = require("../util/misc");
 
 const debug = createDebug("chess");
 
@@ -21,6 +21,12 @@ module.exports = ({ jsonld, pg, router, signing }) => {
       ctx.throw(400, "Invalid request body");
     }
 
+    // Extract the origin.
+    const origin = originOf(parsed.id);
+    if (!origin) {
+      ctx.throw(400, "Invalid activity ID, not a URL");
+    }
+
     // Resolve the activity object.
     const resolver = jsonld.createResolver();
     const activity = await resolver.resolve(parsed, ACTIVITY_STREAMS_CONTEXT);
@@ -28,13 +34,18 @@ module.exports = ({ jsonld, pg, router, signing }) => {
       ctx.throw(400, "Incomplete activity object");
     }
 
-    // Verify the signature.
+    // Verify the actor signature.
     const publicKey = await signing.verify(ctx, raw, resolver);
     if (publicKey.owner !== activity.actor) {
       ctx.throw(400, "Signature does not match actor");
     }
 
-    // Deduplicate.
+    // Verify the activity is from the actor's origin.
+    if (originOf(activity.actor) !== origin) {
+      ctx.throw(400, "Activity and actor origins don't match");
+    }
+
+    // Deduplicate based on activity ID.
     const now = new Date();
     const { rowCount } = await model.tryInsertInboxObject(pg, parsed.id, now);
     if (rowCount === 0) {
