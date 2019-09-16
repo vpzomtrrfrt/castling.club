@@ -5,19 +5,19 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "canvas": "2.0.0-alpha.13",
+    "canvas": "^2.6.0",
     "co-body": "^6.0.0",
-    "debug": "^3.1.0",
-    "dotenv": "^6.0.0",
-    "ejs": "^2.6.1",
-    "got": "^9.0.0",
-    "jsonld": "^1.0.2",
-    "koa": "^2.5.2",
+    "debug": "^4.1.1",
+    "dotenv": "^8.1.0",
+    "ejs": "^2.7.1",
+    "got": "^9.6.0",
+    "jsonld": "^1.7.0",
+    "koa": "^2.8.1",
     "koa-router": "^7.4.0",
-    "leven": "^2.1.0",
+    "leven": "^3.1.0",
     "parse5": "^5.0.0",
-    "pg": "^7.4.3",
-    "uuid": "^3.3.2"
+    "pg": "^7.12.1",
+    "uuid": "^3.3.3"
   },
   "scripts": {
     "lint": "eslint src *.js",
@@ -25,8 +25,8 @@
     "test": "npm run lint && npm run test:chess"
   },
   "devDependencies": {
-    "chai": "4.1.2",
-    "eslint": "^5.2.0",
-    "mocha": "5.2.0"
+    "chai": "^4.2.0",
+    "eslint": "^6.4.0",
+    "mocha": "^6.2.0"
   }
 }
