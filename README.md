@@ -139,7 +139,7 @@ of the app:
 - `src/deliver/` contains the outbox delivery queue processing code.
 
 These could easily be split into separate processes, and could also individually
-be scaled horizontally, because all state lives in PostgreSQL.  In practice,
+be scaled horizontally, because all state lives in PostgreSQL. In practice,
 that kind of scale is not reached, so things are kept simple and single-process
 for now.
 
@@ -194,7 +194,7 @@ rendered on the spot. This code lives in `src/front/draw.js`.
 The ActivityPub objects are all accessible by browser as HTML. This is
 important, because the actor URL and note URLs are often visible to the user.
 Castling.club renders templates for these when accessed through a browser, as
-well as providing various other browser-only pages in `src/front/misc.js`.  The
+well as providing various other browser-only pages in `src/front/misc.js`. The
 actual template files are [EJS] files, found in `assets/tmpl/`.
 
 [castling.club]: https://castling.club

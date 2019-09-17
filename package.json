@@ -22,11 +22,13 @@
   "scripts": {
     "lint": "eslint src *.js",
     "test:chess": "mocha tools/chess-tests.js",
-    "test": "npm run lint && npm run test:chess"
+    "test": "npm run lint && npm run test:chess",
+    "fmt": "prettier --write '{assets,migrations,src,tools}/**/*.{js,json,css}' './*.{js,json,md}'"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^6.4.0",
-    "mocha": "^6.2.0"
+    "mocha": "^6.2.0",
+    "prettier": "^1.18.2"
   }
 }
