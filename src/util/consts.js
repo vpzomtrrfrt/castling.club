@@ -1,36 +1,40 @@
 const path = require("path");
 
-const { words } = require("./misc");
+const { ns, words } = require("./misc");
 
 const ASSETS_BASE = path.join(__dirname, "../../assets");
 
+// Various RDF namespaces used.
+const RDF = ns("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+const LDP = ns("http://www.w3.org/ns/ldp#");
+const AS = ns("https://www.w3.org/ns/activitystreams#");
+const SEC = ns("https://w3id.org/security#");
+const CHESS = ns("https://castling.club/ns/chess/v0#");
+
 // Various JSON-LD contexts used.
-const SECURITY_CONTEXT = "https://w3id.org/security/v1";
-const ACTIVITY_STREAMS_CONTEXT = "https://www.w3.org/ns/activitystreams";
+const AS_CONTEXT = "https://www.w3.org/ns/activitystreams";
+const SEC_CONTEXT = "https://w3id.org/security/v1";
 const CHESS_CONTEXT = "https://castling.club/ns/chess/v0";
 
 // Various MIME types used.
 const JSON_MIME = "application/json";
 const JSON_LD_MIME = "application/ld+json";
-const ACTIVITY_STREAMS_MIME = `${JSON_LD_MIME}; profile="${ACTIVITY_STREAMS_CONTEXT}"`;
-const LEGACY_ACTIVITY_STREAMS_MIME = "application/activity+json";
+const AS_MIME = `${JSON_LD_MIME}; profile="${AS_CONTEXT}"`;
+const LEGACY_AS_MIME = "application/activity+json";
 const CHESS_MIME = `${JSON_LD_MIME}; profile="${CHESS_CONTEXT}"`;
 const PGN_MIME = "application/vnd.chess-pgn";
 
 // The `Accept` header value we send out when requesting JSON-LD.
-const JSON_ACCEPTS = [
-  ACTIVITY_STREAMS_MIME,
-  LEGACY_ACTIVITY_STREAMS_MIME,
-  JSON_LD_MIME,
-  JSON_MIME
-].join(",");
+const JSON_ACCEPTS = [AS_MIME, LEGACY_AS_MIME, JSON_LD_MIME, JSON_MIME].join(
+  ","
+);
 
 // Koa `accepts` parameter, listing all types we respond to with JSON.
 const KOA_JSON_ACCEPTS = [
   "json",
   JSON_LD_MIME,
-  ACTIVITY_STREAMS_MIME,
-  LEGACY_ACTIVITY_STREAMS_MIME,
+  AS_MIME,
+  LEGACY_AS_MIME,
   CHESS_MIME
 ];
 
@@ -83,13 +87,18 @@ const CONFIRMATIONS = [
 
 module.exports = {
   ASSETS_BASE,
-  SECURITY_CONTEXT,
-  ACTIVITY_STREAMS_CONTEXT,
+  RDF,
+  LDP,
+  AS,
+  SEC,
+  CHESS,
+  SEC_CONTEXT,
+  AS_CONTEXT,
   CHESS_CONTEXT,
   JSON_MIME,
   JSON_LD_MIME,
-  ACTIVITY_STREAMS_MIME,
-  LEGACY_ACTIVITY_STREAMS_MIME,
+  AS_MIME,
+  LEGACY_AS_MIME,
   CHESS_MIME,
   PGN_MIME,
   JSON_ACCEPTS,

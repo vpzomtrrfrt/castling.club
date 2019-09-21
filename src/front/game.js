@@ -6,21 +6,32 @@ const leven = require("leven");
 const createGame = require("../util/chess");
 const html = require("../util/html");
 const model = require("../util/model");
+const { getActor } = require("../util/rdfModel");
+const { renderPgn } = require("../util/pgn");
+const { renderTemplate } = require("../util/fs");
+const { sample, sortBy } = require("../util/misc");
 const {
-  ACTIVITY_STREAMS_CONTEXT,
+  AS,
+  AS_CONTEXT,
   CHESS_CONTEXT,
-  ACTIVITY_STREAMS_MIME,
+  AS_MIME,
   PGN_MIME,
   KOA_JSON_ACCEPTS,
   SHORT_CACHE_SEC,
   UNICODE_BADGES,
   UNICODE_PIECES
 } = require("../util/consts");
-const { sample, sortBy } = require("../util/misc");
-const { renderTemplate } = require("../util/fs");
-const { renderPgn } = require("../util/pgn");
 
 const UUID_REGEXP = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// What kind of actors can be challengers.
+const CHALLENGER_TYPES = new Set([AS("Person")]);
+// What kind of actors can be challenged.
+const CHALLENGED_TYPES = new Set([
+  AS("Person"),
+  AS("Service"),
+  AS("Application")
+]);
 
 const debug = createDebug("chess:game");
 const h = html.createElement;
@@ -37,9 +48,9 @@ module.exports = async ({
 }) => {
   // Handle challenges, and start a new game if everything looks good.
   const handleChallenge = async object => {
-    // Must be a person.
+    // Verify the actor is a type that can be issue challenges.
     const challengerActor = object.actor;
-    if (challengerActor.type !== "Person") {
+    if (!CHALLENGER_TYPES.has(challengerActor.type)) {
       debug("Challenge from invalid actor type");
       return;
     }
@@ -53,21 +64,21 @@ module.exports = async ({
       return;
     }
 
-    // Resolve the other player actor document.
+    // Load the actor document of the other player.
     const otherId = mentions.values().next().value;
-    const resolver = jsonld.createResolver();
-    let otherActor;
+    const store = jsonld.createStore();
     try {
-      otherActor = await await resolver.resolve(
-        otherId,
-        ACTIVITY_STREAMS_CONTEXT
-      );
+      await store.load(otherId);
     } catch (err) {
-      console.log(`Failed to resolve challenged actor: ${otherId}`);
+      console.log(`Failed to load challenged actor document: ${otherId}`);
       console.log(`Error: ${err.message}`);
       return;
     }
-    if (!["Person", "Service", "Application"].includes(otherActor.type)) {
+
+    const otherActor = getActor(store, otherId);
+
+    // Verify the other player actor is a type that can be challenged.
+    if (!CHALLENGED_TYPES.has(otherActor.type)) {
       debug("Challenge to invalid actor type");
       return;
     }
@@ -280,14 +291,14 @@ module.exports = async ({
     const images = draw.imageUrls(fen, move);
     const createdAt = opts.createdAt || new Date();
     const reply = await outbox.createObject(pg, {
-      "@context": [ACTIVITY_STREAMS_CONTEXT, CHESS_CONTEXT],
+      "@context": [AS_CONTEXT, CHESS_CONTEXT],
       type: "Note",
       published: createdAt.toISOString(),
       attributedTo: actorUrl,
       inReplyTo: object.id,
       // @todo: Disabled for now, but maybe should be configurable?
       // @todo: Mastodon requires us to specify this in full.
-      // to: ["https://www.w3.org/ns/activitystreams#Public"],
+      // to: [AS("Public")],
       // cc: [game.whiteId, game.blackId],
       to: [game.whiteId, game.blackId],
       content: html.render(replyContent),
@@ -351,7 +362,7 @@ module.exports = async ({
 
     // Create the reply note.
     const reply = await outbox.createObject(pg, {
-      "@context": [ACTIVITY_STREAMS_CONTEXT, CHESS_CONTEXT],
+      "@context": [AS_CONTEXT, CHESS_CONTEXT],
       type: "Note",
       published: new Date().toISOString(),
       attributedTo: actorUrl,
@@ -391,7 +402,7 @@ module.exports = async ({
       "@context": undefined
     }));
     const game = {
-      "@context": [ACTIVITY_STREAMS_CONTEXT, CHESS_CONTEXT],
+      "@context": [AS_CONTEXT, CHESS_CONTEXT],
       id: `${origin}/games/${gameRow.id}`,
       fen: gameRow.fen,
       badge: gameRow.badge,
@@ -419,7 +430,7 @@ module.exports = async ({
       ctx.attachment(`${gameRow.id}.pgn`);
     } else if (ctx.accepts(KOA_JSON_ACCEPTS)) {
       ctx.body = game;
-      ctx.type = ACTIVITY_STREAMS_MIME;
+      ctx.type = AS_MIME;
     } else {
       ctx.status = 406;
     }

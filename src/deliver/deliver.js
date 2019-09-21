@@ -4,12 +4,9 @@ const got = require("got");
 const postgres = require("pg");
 
 const model = require("../util/model");
-const {
-  ACTIVITY_STREAMS_CONTEXT,
-  ACTIVITY_STREAMS_MIME,
-  JSON_ACCEPTS
-} = require("../util/consts");
+const { AS_MIME, JSON_ACCEPTS } = require("../util/consts");
 const { checkPublicUrl, detach } = require("../util/misc");
+const { getActor, getEndpoints } = require("../util/rdfModel");
 
 const DEFAULT_INTERVAL = 60 * 1000;
 const DELIVER_DELAY = 2 * 1000;
@@ -34,7 +31,7 @@ module.exports = async ({
   // Resolve an actor inbox URL.
   const resolveInbox = async (pg, delivery) => {
     const { outboxId, addressee } = delivery;
-    const resolver = jsonld.createResolver();
+    const store = jsonld.createStore();
 
     // Lock all rows with the same addressee and no inbox yet.
     const { rows: deliveryRows } = await model.lockSharedAddresseeDeliveries(
@@ -46,12 +43,11 @@ module.exports = async ({
     const outboxIds = deliveryRows.map(row => row.outboxId);
     assert(outboxIds.includes(outboxId));
 
-    // Try to resolve the actor document.
-    let actor;
+    // Try to load the actor document.
     try {
-      actor = await resolver.resolve(addressee, ACTIVITY_STREAMS_CONTEXT);
+      await store.load(addressee);
     } catch (err) {
-      console.warn(`Failed to resolve addressee: ${addressee}`);
+      console.warn(`Failed to load addressee document: ${addressee}`);
       console.warn(`Error: ${err.message}`);
 
       // Schedule a retry, if appropriate.
@@ -71,17 +67,17 @@ module.exports = async ({
       return;
     }
 
+    // Get the actor details we need.
+    const actor = getActor(store, addressee);
+
     // Try to use the shared inbox if possible.
     let inbox;
     if (actor.endpoints) {
       try {
-        const endpoints = await resolver.resolve(
-          actor.endpoints,
-          ACTIVITY_STREAMS_CONTEXT
-        );
-        inbox = endpoints.sharedInbox;
+        await store.load(actor.endpoints);
+        inbox = getEndpoints(store, actor.endpoints).sharedInbox;
       } catch (err) {
-        console.warn(`Failed to resolve endpoints for addressee: ${addressee}`);
+        console.warn(`Failed to load endpoints for addressee: ${addressee}`);
         console.warn(`Error: ${err.message}`);
       }
     }
@@ -153,7 +149,7 @@ module.exports = async ({
         json: true,
         headers: {
           "user-agent": `${origin}/`,
-          "content-type": ACTIVITY_STREAMS_MIME,
+          "content-type": AS_MIME,
           accept: JSON_ACCEPTS
         },
         hooks: {

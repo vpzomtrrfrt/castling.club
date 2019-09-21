@@ -1,11 +1,11 @@
 const crypto = require("crypto");
 
-const { SECURITY_CONTEXT } = require("../util/consts");
+const { getPublicKey } = require("../util/rdfModel");
 
 module.exports = ({ domain }) => {
   // Verify the `Digest` and `Signature` headers,
   // and return the public key used to sign the request.
-  const verify = async (ctx, body, jsonldCtx) => {
+  const verify = async (ctx, body, store) => {
     const { headers, rawHeaders } = ctx.req;
 
     // Ensure the `Host` header matches our domain.
@@ -62,12 +62,7 @@ module.exports = ({ domain }) => {
 
     // Try each `Signature` header provided, but limit to 2.
     for (const signatureHeader of signatureHeaders.slice(0, 2)) {
-      const publicKey = await verifyOne(
-        ctx,
-        signatureHeader,
-        headerMap,
-        jsonldCtx
-      );
+      const publicKey = await verifyOne(ctx, signatureHeader, headerMap, store);
       if (publicKey) {
         return publicKey;
       }
@@ -78,7 +73,7 @@ module.exports = ({ domain }) => {
   };
 
   // Verify a single `Signature` header, and return the public key if valid.
-  const verifyOne = async (ctx, signatureHeader, headerMap, jsonldCtx) => {
+  const verifyOne = async (ctx, signatureHeader, headerMap, store) => {
     // Parse the `Signature` header parameters.
     // @todo: Properly parse quoted-strings.
     const params = signatureHeader.split(/\s*,\s*/g).reduce((obj, param) => {
@@ -121,16 +116,20 @@ module.exports = ({ domain }) => {
       }
     }
 
-    // Resolve the JSON-LD public key document.
+    // Load the JSON-LD public key document.
     // @todo: Support non-RSA keys.
-    let publicKey;
     try {
-      publicKey = await jsonldCtx.resolve(keyId, SECURITY_CONTEXT);
+      await store.load(keyId);
     } catch (err) {
-      ctx.throw(400, "Signature public key could not be resolved");
+      ctx.throw(
+        400,
+        `Signature public key document could not be loaded: ${err.mesage}`
+      );
     }
+
+    const publicKey = getPublicKey(store, keyId);
     if (!publicKey.publicKeyPem) {
-      return null;
+      return undefined;
     }
 
     // Build the signed data.
@@ -150,7 +149,7 @@ module.exports = ({ domain }) => {
       .update(signedData)
       .verify(publicKey.publicKeyPem, signature, "base64");
     if (!valid) {
-      return null;
+      return undefined;
     }
 
     return publicKey;

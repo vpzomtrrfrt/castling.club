@@ -5,19 +5,14 @@ const uuid = require("uuid/v4");
 const html = require("../util/html");
 const model = require("../util/model");
 const {
-  ACTIVITY_STREAMS_CONTEXT,
-  ACTIVITY_STREAMS_MIME,
+  AS,
+  AS_CONTEXT,
+  AS_MIME,
   KOA_JSON_ACCEPTS,
   SHORT_CACHE_SEC
 } = require("../util/consts");
 const { ensureArray } = require("../util/misc");
 const { renderTemplate } = require("../util/fs");
-
-const PUBLIC_ENDPOINTS = [
-  "Public",
-  "as:Public",
-  "https://www.w3.org/ns/activitystreams#Public"
-];
 
 const debug = createDebug("chess");
 
@@ -34,12 +29,12 @@ module.exports = async ({ actorUrl, domain, origin, pg, router }) => {
 
     // Assume the default context, if none was specified.
     if (!object["@context"]) {
-      object["@context"] = ACTIVITY_STREAMS_CONTEXT;
+      object["@context"] = AS_CONTEXT;
     }
 
     // Create the wrapping activity.
     const activity = {
-      "@context": ACTIVITY_STREAMS_CONTEXT,
+      "@context": AS_CONTEXT,
       id: `${id}/activity`,
       type: "Create",
       actor: actorUrl,
@@ -58,9 +53,7 @@ module.exports = async ({ actorUrl, domain, origin, pg, router }) => {
 
     // Don't deliver to ourselves, or the special public endpoint.
     addressees.delete(actorUrl);
-    for (const endpoint of PUBLIC_ENDPOINTS) {
-      addressees.delete(endpoint);
-    }
+    addressees.delete(AS("Public"));
 
     // Add to database outbox.
     const createdAt = new Date(object.published);
@@ -152,7 +145,7 @@ module.exports = async ({ actorUrl, domain, origin, pg, router }) => {
       ctx.type = "html";
     } else if (ctx.accepts(KOA_JSON_ACCEPTS)) {
       ctx.body = object;
-      ctx.type = ACTIVITY_STREAMS_MIME;
+      ctx.type = AS_MIME;
     } else {
       ctx.status = 406;
     }
@@ -173,7 +166,7 @@ module.exports = async ({ actorUrl, domain, origin, pg, router }) => {
       ctx.redirect(activity.object);
     } else if (ctx.accepts(KOA_JSON_ACCEPTS)) {
       ctx.body = activity;
-      ctx.type = ACTIVITY_STREAMS_MIME;
+      ctx.type = AS_MIME;
     } else {
       ctx.status = 406;
     }

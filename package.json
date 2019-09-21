@@ -5,6 +5,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@rdfjs/data-model": "^1.1.2",
     "canvas": "^2.6.0",
     "co-body": "^6.0.0",
     "debug": "^4.1.1",

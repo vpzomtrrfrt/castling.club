@@ -1,23 +1,51 @@
 const createDebug = require("debug");
 const got = require("got");
 const jsonldFactory = require("jsonld");
+const rdf = require("@rdfjs/data-model");
 
+const { DataStore } = require("../util/rdf");
 const { JSON_ACCEPTS } = require("../util/consts");
 const { checkPublicUrl } = require("../util/misc");
 
 const debug = createDebug("chess:jsonld");
 
-// Whether the object (from a flat document) is a reference.
-const isSubjectReference = node =>
-  node && node["@id"] && Object.keys(node).length === 1;
+// The JSON-LD library produces plain object RDF terms, instead of actual model
+// instances. This function does the conversion. Borrowed from
+// `@rdfjs/parser-jsonld`, also MIT.
+const fromPlainTerm = plainTerm => {
+  switch (plainTerm.termType) {
+    case "NamedNode":
+      return rdf.namedNode(plainTerm.value);
+    case "BlankNode":
+      return rdf.blankNode(plainTerm.value.substr(2));
+    case "Literal":
+      return rdf.literal(
+        plainTerm.value,
+        plainTerm.language || rdf.namedNode(plainTerm.datatype.value)
+      );
+    case "DefaultGraph":
+      return rdf.defaultGraph();
+    default:
+      throw Error("unknown termType: " + plainTerm.termType);
+  }
+};
 
-// Helper class used to resolve JSON-LD documents.
-class Resolver {
+// Convert a plan object RDF quad to a model instance.
+const fromPlainQuad = plainQuad =>
+  rdf.quad(
+    fromPlainTerm(plainQuad.subject),
+    fromPlainTerm(plainQuad.predicate),
+    fromPlainTerm(plainQuad.object),
+    fromPlainTerm(plainQuad.graph)
+  );
+
+// Holds a graph of data extracted from JSON-LD documents.
+class JsonLdDataStore extends DataStore {
   constructor(jsonld) {
-    // A jsonld instance, typically with a caching loader.
+    super();
+
+    // A jsonld instance, typically setup with a caching loader.
     this.jsonld = jsonld;
-    // Loaded nodes in flattened form.
-    this.graph = Object.create(null);
     // Options used for all jsonld calls.
     this.options = {
       // Share the ID issuer, so we don't create conflicts between calls.
@@ -25,46 +53,19 @@ class Resolver {
     };
   }
 
-  // Find a node, and compact according to the context.
-  // Input may be JSON-LD input or an ID.
-  // Output is always a single node, without embedding.
-  async resolve(input, context) {
-    // Try to resolve from already loaded nodes.
-    if (typeof input === "string") {
-      const node = this.graph[input];
-      if (node) {
-        return this.jsonld.compact(node, context, this.options);
-      }
+  // Load a document into the graph. Input may be JSON-LD or a URL.
+  async load(input) {
+    // Check if it already exists.
+    if (typeof input === "string" && this.spo[input]) {
+      return;
     }
 
-    // Fetch the document if necessary, and get the expanded form.
-    const expanded = await this.jsonld.expand(input, this.options);
-    if (expanded.length === 0) {
-      throw Error("JSON-LD resolved to empty result");
-    }
+    // Fetch the document if necessary, and get the RDF quads.
+    const quads = await this.jsonld.toRDF(input, this.options);
 
-    // Determine what to return. If input was an ID, return that node.
-    // Otherwise, make sure we return the same toplevel node.
-    const id = typeof input === "string" ? input : expanded[0]["@id"];
-
-    // Flatten the document and load each node into the graph.
-    // Like `jsonld.flatten`, but saves us a bit of processing.
-    const nodeMap = await this.jsonld.createNodeMap(expanded, this.options);
-    for (const nodeId in nodeMap) {
-      const node = nodeMap[nodeId];
-      if (!isSubjectReference(node)) {
-        const id = node["@id"];
-        this.graph[id] = node;
-        debug(`LOAD: ${id}`);
-      }
-    }
-
-    // The requested node must be in the graph now.
-    const node = this.graph[id];
-    if (node) {
-      return this.jsonld.compact(node, context, this.options);
-    } else {
-      throw Error(`JSON-LD resolve failed for ID: ${id}`);
+    // Insert the quads into the dataset.
+    for (const quad of quads) {
+      this.add(fromPlainQuad(quad));
     }
   }
 }
@@ -90,7 +91,7 @@ module.exports = ({ cache, env, origin }) => {
     return { document: response.body };
   };
 
-  const createResolver = () => new Resolver(jsonld);
+  const createStore = () => new JsonLdDataStore(jsonld);
 
-  return { createResolver };
+  return { createStore };
 };

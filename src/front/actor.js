@@ -1,8 +1,8 @@
 const {
-  ACTIVITY_STREAMS_CONTEXT,
-  ACTIVITY_STREAMS_MIME,
+  AS_CONTEXT,
+  AS_MIME,
   KOA_JSON_ACCEPTS,
-  SECURITY_CONTEXT
+  SEC_CONTEXT
 } = require("../util/consts");
 const { readAsset } = require("../util/fs");
 
@@ -34,7 +34,7 @@ module.exports = async ({
         links: [
           {
             rel: "self",
-            type: ACTIVITY_STREAMS_MIME,
+            type: AS_MIME,
             href: actorUrl
           }
         ]
@@ -49,7 +49,7 @@ module.exports = async ({
   // @todo: Support non-RSA keys.
   router.get("/@king", ctx => {
     const actor = {
-      "@context": [ACTIVITY_STREAMS_CONTEXT, SECURITY_CONTEXT],
+      "@context": [AS_CONTEXT, SEC_CONTEXT],
       id: actorUrl,
       type: "Service",
       name: "King",
@@ -80,7 +80,7 @@ module.exports = async ({
       ctx.redirect("/");
     } else if (ctx.accepts(KOA_JSON_ACCEPTS)) {
       ctx.body = actor;
-      ctx.type = ACTIVITY_STREAMS_MIME;
+      ctx.type = AS_MIME;
     } else {
       ctx.status = 406;
     }
