@@ -5,7 +5,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@koa/router": "^8.0.1",
     "@rdfjs/data-model": "^1.1.2",
+    "@types/rdf-js": "^2.0.2",
     "canvas": "^2.6.0",
     "co-body": "^6.0.0",
     "debug": "^4.1.1",
@@ -14,22 +16,36 @@
     "got": "^9.6.0",
     "jsonld": "^1.7.0",
     "koa": "^2.8.1",
-    "koa-router": "^7.4.0",
     "leven": "^3.1.0",
     "parse5": "^5.0.0",
     "pg": "^7.12.1",
     "uuid": "^3.3.3"
   },
-  "scripts": {
-    "lint": "eslint src *.js",
-    "test:chess": "mocha tools/chess-tests.js",
-    "test": "npm run lint && npm run test:chess",
-    "fmt": "prettier --write '{assets,migrations,src,tools}/**/*.{js,json,css}' './*.{js,json,md}'"
-  },
   "devDependencies": {
+    "@types/chai": "^4.2.3",
+    "@types/co-body": "^0.0.3",
+    "@types/debug": "^4.1.5",
+    "@types/dotenv": "^6.1.1",
+    "@types/ejs": "^2.6.3",
+    "@types/got": "^9.6.7",
+    "@types/http-errors": "^1.6.2",
+    "@types/koa": "^2.0.49",
+    "@types/koa__router": "^8.0.0",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.7.5",
+    "@types/parse5": "^5.0.2",
+    "@types/pg": "^7.11.1",
+    "@types/uuid": "^3.4.5",
     "chai": "^4.2.0",
-    "eslint": "^6.4.0",
     "mocha": "^6.2.0",
-    "prettier": "^1.18.2"
+    "prettier": "^1.18.2",
+    "typescript": "^3.6.3"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "mocha tools/chess-tests.js",
+    "prepare": "tsc",
+    "fmt": "prettier --write 'src/**/*.ts' '{assets,tools}/**/*.{js,json,css}' './*.{js,json,md}'"
   }
 }
