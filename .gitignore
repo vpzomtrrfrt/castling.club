@@ -1,5 +1,7 @@
+/*.tgz
 /.env
 /dist
 /node_modules
 /signing-key
 /signing-key.pub
+/tsconfig.tsbuildinfo

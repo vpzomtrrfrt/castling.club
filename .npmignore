@@ -1,0 +1,12 @@
+/*.tgz
+/.editorconfig
+/.env
+/assets/img/src
+/dist/test-*
+/signing-key
+/signing-key.pub
+/src
+/tools/convert-svg.sh
+/tools/ext
+/tools/test-*
+/tsconfig.*
