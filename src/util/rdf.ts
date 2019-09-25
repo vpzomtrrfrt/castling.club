@@ -1,6 +1,6 @@
 import { NamedNode, BlankNode, Literal, Quad } from "rdf-js";
 
-import { RDF } from "./consts";
+import { XML, RDF } from "./consts";
 
 export type Node = NamedNode | BlankNode;
 
@@ -126,7 +126,7 @@ export const text = (
   const literals = <Literal[]>terms.filter(term => term.termType === "Literal");
 
   const strings = literals.filter(
-    term => term.datatype.value === RDF("string")
+    term => term.datatype.value === XML("string")
   );
   const langStrings = literals.filter(
     term => term.datatype.value === RDF("langString")

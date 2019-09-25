@@ -5,6 +5,7 @@ import { ns, words } from "./misc";
 export const ASSETS_BASE = path.join(__dirname, "../../assets");
 
 // Various RDF namespaces used.
+export const XML = ns("http://www.w3.org/2001/XMLSchema#");
 export const RDF = ns("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 export const LDP = ns("http://www.w3.org/ns/ldp#");
 export const AS = ns("https://www.w3.org/ns/activitystreams#");
