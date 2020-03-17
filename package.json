@@ -43,7 +43,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "mocha tools/chess-tests.js",
+    "test": "mocha tools/test-chess.js",
     "prepare": "tsc",
     "fmt": "prettier --write 'src/**/*.ts' '{assets,tools}/**/*.{js,json,css}' './*.{js,json,md}'"
   }
