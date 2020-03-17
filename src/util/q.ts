@@ -53,7 +53,7 @@ const _q = async <T>(
   for (const field of res.fields) {
     field.name = fromUnderscored(field.name);
   }
-  res.rows = res.rows.map(raw => {
+  res.rows = res.rows.map((raw) => {
     const out: any = {};
     for (const rawField in raw) {
       const outField = fromUnderscored(rawField);
@@ -100,7 +100,7 @@ q.transact = <T>(
   pg: Pg,
   fn: (client: ClientBase) => Promise<T>
 ): Promise<T> => {
-  return q.withClient(pg, async pg => {
+  return q.withClient(pg, async (pg) => {
     let res;
     await pg.query(`begin`);
     try {

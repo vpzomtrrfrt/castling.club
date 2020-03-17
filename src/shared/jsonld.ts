@@ -8,7 +8,7 @@ import {
   Quad_Subject,
   Quad_Predicate,
   Quad_Object,
-  Quad_Graph
+  Quad_Graph,
 } from "rdf-js";
 
 import jsonldFactory, {
@@ -16,7 +16,7 @@ import jsonldFactory, {
   Quad as PlainQuad,
   IdentifierIssuer,
   ToRdfOptions,
-  Processor
+  Processor,
 } from "jsonld";
 
 import { CacheService } from "./cache";
@@ -71,7 +71,7 @@ export class TripleStore extends PlainTripleStore {
     // Options used for all jsonld calls.
     this.options = {
       // Share the ID issuer, so we don't create conflicts between calls.
-      issuer: new IdentifierIssuer("_:b")
+      issuer: new IdentifierIssuer("_:b"),
     };
   }
 
@@ -95,7 +95,7 @@ export class TripleStore extends PlainTripleStore {
 export default async ({
   cache,
   env,
-  origin
+  origin,
 }: {
   cache: CacheService;
   env: string;
@@ -110,15 +110,15 @@ export default async ({
     }
 
     debug(`REQ: ${url}`);
-    const response = await got(url, {
+    const document: any = await got(url, {
+      resolveBodyOnly: true,
       cache: cache.http,
-      json: true,
       headers: {
         "user-agent": `${origin}/`,
-        accept: JSON_ACCEPTS
-      }
-    });
-    return { document: response.body };
+        accept: JSON_ACCEPTS,
+      },
+    }).json();
+    return { document };
   };
 
   const createStore = () => new TripleStore(jsonld);

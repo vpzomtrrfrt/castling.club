@@ -58,14 +58,14 @@ class Runner {
     const pg = this.pg!;
 
     const allFiles = await readdir(BASE_DIR);
-    const files = allFiles.filter(name => /^\d{3}_.+\.js$/.test(name)).sort();
+    const files = allFiles.filter((name) => /^\d{3}_.+\.js$/.test(name)).sort();
 
     const { rows } = await pg.query<MigrationRow>({
-      text: 'select "name", "stamp" from "migrations" order by "stamp" asc'
+      text: 'select "name", "stamp" from "migrations" order by "stamp" asc',
     });
 
-    return files.map(name => {
-      const row = rows.find(row => row.name === name);
+    return files.map((name) => {
+      const row = rows.find((row) => row.name === name);
       return row || { name, stamp: undefined };
     });
   }
@@ -96,16 +96,16 @@ class Runner {
     const pg = this.pg!;
     const rows = await this.list();
     const stamp = new Date();
-    const todo = rows.filter(row => !row.stamp);
+    const todo = rows.filter((row) => !row.stamp);
     await this.run("up", todo, {
       ...options,
       after: async (direction, row) => {
         await pg.query({
           text: 'insert into "migrations" ("name", "stamp") values ($1, $2)',
-          values: [row.name, stamp]
+          values: [row.name, stamp],
         });
         return (options.after || noop)(direction, row);
-      }
+      },
     });
     return todo;
   }
@@ -114,18 +114,20 @@ class Runner {
     const pg = this.pg!;
     const rows = await this.list();
     const stamp = Math.max(
-      ...rows.map(row => (row.stamp ? row.stamp.getTime() : -1))
+      ...rows.map((row) => (row.stamp ? row.stamp.getTime() : -1))
     );
-    const todo = rows.filter(row => row.stamp && row.stamp.getTime() === stamp);
+    const todo = rows.filter(
+      (row) => row.stamp && row.stamp.getTime() === stamp
+    );
     await this.run("down", todo, {
       ...options,
       after: async (direction, row) => {
         await pg.query({
           text: 'delete from "migrations" where "name" = $1',
-          values: [row.name]
+          values: [row.name],
         });
         return (options.after || noop)(direction, row);
-      }
+      },
     });
     return todo;
   }
@@ -146,7 +148,7 @@ export const cli = () => {
         const rows = await runner[cmd]({
           before: (direction, row) => {
             console.log(`${row.name} ${direction}...`);
-          }
+          },
         });
         console.log(`Ran ${rows.length} migration(s)`);
       } else if (cmd === "list") {
@@ -168,7 +170,7 @@ export const cli = () => {
     }
   };
 
-  main().catch(err => {
+  main().catch((err) => {
     console.error(err.stack);
     process.exit(1);
   });

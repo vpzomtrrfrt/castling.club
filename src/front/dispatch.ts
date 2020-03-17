@@ -15,7 +15,7 @@ export default async ({
   actorUrl,
   inbox,
   game,
-  challengeBoard
+  challengeBoard,
 }: {
   actorUrl: string;
   inbox: InboxCtrl;
@@ -38,7 +38,7 @@ export default async ({
 
     // Look for the line containing our mention.
     let match;
-    object.contentText.split(/\n/g).some(line => {
+    object.contentText.split(/\n/g).some((line) => {
       return (match = MENTION_REGEXP.exec(line));
     });
     if (!match) {

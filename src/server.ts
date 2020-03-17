@@ -14,7 +14,7 @@ const {
   APP_KEY_FILE: keyFile = "signing-key",
   APP_HMAC_SECRET: hmacSecret = "INSECURE",
   NODE_ENV: env = "development",
-  PORT: port = "5080"
+  PORT: port = "5080",
 } = process.env;
 
 // Read actor key files.
@@ -30,11 +30,11 @@ const config = {
   adminEmail,
   publicKeyPem,
   privateKeyPem,
-  hmacSecret
+  hmacSecret,
 };
 
 // Create the front instance.
-front(config).then(instance => {
+front(config).then((instance) => {
   // Start listening.
   const server = instance.listen(parseInt(port, 10), () => {
     const addr = server.address();

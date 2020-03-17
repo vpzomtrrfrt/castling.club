@@ -8,7 +8,7 @@ const main = async (): Promise<void> => {
   // Create stubs.
   const app: any = {};
   app.router = {
-    get: () => {}
+    get: () => {},
   };
   app.draw = await draw(app);
 

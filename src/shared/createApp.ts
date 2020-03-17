@@ -35,7 +35,7 @@ export default async ({
   adminEmail,
   publicKeyPem,
   privateKeyPem,
-  hmacSecret
+  hmacSecret,
 }: AppConfig): Promise<BaseApp> => {
   // Derived settings.
   const origin = `${scheme}://${domain}`;
@@ -54,7 +54,7 @@ export default async ({
     hmacSecret,
     origin,
     actorUrl,
-    publicKeyUrl
+    publicKeyUrl,
   };
 
   // Instances of external dependencies.

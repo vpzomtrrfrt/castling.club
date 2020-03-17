@@ -19,7 +19,7 @@ import {
   updateDeliveryAttemptByAddressees,
   deleteDeliveriesByAddressees,
   getNextDelivery,
-  transact
+  transact,
 } from "../util/model";
 
 export type DeliverCtrl = void;
@@ -45,7 +45,7 @@ export default async ({
   privateKeyPem,
   pg,
   jsonld,
-  signing
+  signing,
 }: {
   env: string;
   origin: string;
@@ -70,7 +70,7 @@ export default async ({
     );
 
     // Should've matched the original delivery as well.
-    const outboxIds = deliveryRows.map(row => row.outboxId);
+    const outboxIds = deliveryRows.map((row) => row.outboxId);
     assert(outboxIds.includes(outboxId));
 
     // Try to load the actor document.
@@ -155,7 +155,7 @@ export default async ({
     );
 
     // Should've matched the original delivery as well.
-    const addressees = deliveryRows.map(delivery => delivery.addressee);
+    const addressees = deliveryRows.map((delivery) => delivery.addressee);
     assert(addressees.includes(addressee));
 
     // Get the activity body.
@@ -166,29 +166,28 @@ export default async ({
     // Use the object context, assuming it contains the activity streams
     // context, but may contain additional vocabularies.
     const { object, activity } = outboxRows[0];
-    const body = {
+    const json = {
       ...activity,
       "@context": object["@context"],
       object: {
         ...object,
-        "@context": undefined
-      }
+        "@context": undefined,
+      },
     };
 
     // Make the signed request to the inbox.
     let res;
     try {
       res = await got.post(inbox, {
-        json: true,
         headers: {
           "user-agent": `${origin}/`,
           "content-type": AS_MIME,
-          accept: JSON_ACCEPTS
+          accept: JSON_ACCEPTS,
         },
         hooks: {
-          beforeRequest: [signing.signHook(publicKeyUrl, privateKeyPem)]
+          beforeRequest: [signing.signHook(publicKeyUrl, privateKeyPem)],
         },
-        body
+        json,
       });
     } catch (err) {
       console.warn(`Failed delivery to inbox: ${inbox}`);
@@ -268,7 +267,7 @@ export default async ({
   // Attempt to dequeue the next delivery, or set a timer.
   const dequeue = async (): Promise<boolean> => {
     let result = false;
-    await transact(pg, async pg => {
+    await transact(pg, async (pg) => {
       const { rows } = await getNextDelivery(pg);
       if (rows.length === 0) {
         return;
@@ -326,7 +325,7 @@ export default async ({
   const listener = new postgres.Client();
   await listener.connect();
   await listener.query("listen deliveries_changed");
-  listener.on("notification", msg => {
+  listener.on("notification", (msg) => {
     if (idle && msg.channel === "deliveries_changed") {
       if (timerHandle) {
         clearTimeout(timerHandle);

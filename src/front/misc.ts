@@ -13,7 +13,7 @@ export default async ({
   domain,
   origin,
   pg,
-  router
+  router,
 }: {
   adminUrl: string;
   adminEmail: string;
@@ -26,12 +26,12 @@ export default async ({
   const stylesheet = await readAsset("css/main.css");
 
   // Serve the index page.
-  router.get("/", async ctx => {
+  router.get("/", async (ctx) => {
     const { rows: challengeBoardRows } = await getChallengeBoard(pg);
     const { rows: recentGames } = await getRecentGames(pg);
 
     // Format full names for each entry, as you'd use in a mention.
-    const challengeBoard = challengeBoardRows.map(entry => {
+    const challengeBoard = challengeBoardRows.map((entry) => {
       const match = /^https?:\/\/([^/]+)\//.exec(entry.actorId);
       const actorFullName = match
         ? `${entry.actorName}@${match[1]}`
@@ -43,59 +43,59 @@ export default async ({
     ctx.body = await renderTemplate("index", {
       domain,
       challengeBoard,
-      recentGames
+      recentGames,
     });
     ctx.type = "html";
   });
 
   // Serve the stylesheet for HTML responses.
-  router.get("/main.css", async ctx => {
+  router.get("/main.css", async (ctx) => {
     ctx.body = stylesheet;
     ctx.type = "css";
   });
 
   // Serve the chess vocabulary for JSON-LD.
-  router.get("/ns/chess/v0", async ctx => {
+  router.get("/ns/chess/v0", async (ctx) => {
     ctx.body = chessNs;
     ctx.type = JSON_LD_MIME;
   });
 
   // Serve nodeinfo webfinger.
-  router.get("/.well-known/nodeinfo", ctx => {
+  router.get("/.well-known/nodeinfo", (ctx) => {
     ctx.body = {
       links: [
         {
           rel: "http://nodeinfo.diaspora.software/ns/schema/2.0",
-          href: `${origin}/nodeinfo`
-        }
-      ]
+          href: `${origin}/nodeinfo`,
+        },
+      ],
     };
   });
 
   // Serve nodeinfo.
-  router.get("/nodeinfo", ctx => {
+  router.get("/nodeinfo", (ctx) => {
     ctx.body = {
       version: "2.0",
       software: {
         name: domain,
-        version: "n/a"
+        version: "n/a",
       },
       protocols: ["activitypub"],
       services: {
         inbound: [],
-        outbound: []
+        outbound: [],
       },
       openRegistrations: false,
       usage: {
-        users: {}
+        users: {},
       },
       metadata: {
         description:
           "A custom server in the fediverse that hosts games of chess." +
           ` See ${origin}/ for how to play!`,
         admin: adminUrl,
-        email: adminEmail
-      }
+        email: adminEmail,
+      },
     };
     ctx.type =
       "application/json; profile=http://nodeinfo.diaspora.software/ns/schema/2.0#";

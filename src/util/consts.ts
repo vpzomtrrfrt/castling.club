@@ -30,7 +30,7 @@ export const JSON_ACCEPTS = [
   AS_MIME,
   LEGACY_AS_MIME,
   JSON_LD_MIME,
-  JSON_MIME
+  JSON_MIME,
 ].join(",");
 
 // Koa `accepts` parameter, listing all types we respond to with JSON.
@@ -39,7 +39,7 @@ export const KOA_JSON_ACCEPTS = [
   JSON_LD_MIME,
   AS_MIME,
   LEGACY_AS_MIME,
-  CHESS_MIME
+  CHESS_MIME,
 ];
 
 // For signed requests we receive, the leeway allowed in the `Date` header.
@@ -71,7 +71,7 @@ export const UNICODE_PIECES: { [piece: string]: string } = {
   bb: "♝",
   br: "♜",
   bq: "♛",
-  bk: "♚"
+  bk: "♚",
 };
 
 // Generic confirmations, which should be followed by a description.
@@ -86,5 +86,5 @@ export const CONFIRMATIONS = [
   "Whicked!",
   "Cool!",
   "Superb!",
-  "Nice!"
+  "Nice!",
 ];

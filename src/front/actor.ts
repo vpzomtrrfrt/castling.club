@@ -6,7 +6,7 @@ import {
   AS_CONTEXT,
   AS_MIME,
   KOA_JSON_ACCEPTS,
-  SEC_CONTEXT
+  SEC_CONTEXT,
 } from "../util/consts";
 
 export type ActorCtrl = void;
@@ -17,7 +17,7 @@ export default async ({
   origin,
   publicKeyPem,
   publicKeyUrl,
-  router
+  router,
 }: {
   actorUrl: string;
   domain: string;
@@ -35,11 +35,11 @@ export default async ({
     "king",
     `king@${domain}`,
     "acct:king",
-    accountUrl
+    accountUrl,
   ]);
 
   // Handle Webfinger requests.
-  router.get("/.well-known/webfinger", ctx => {
+  router.get("/.well-known/webfinger", (ctx) => {
     if (validQueries.has(ctx.query.resource)) {
       ctx.body = {
         subject: accountUrl,
@@ -47,9 +47,9 @@ export default async ({
           {
             rel: "self",
             type: AS_MIME,
-            href: actorUrl
-          }
-        ]
+            href: actorUrl,
+          },
+        ],
       };
       ctx.type = "application/jrd+json";
     } else {
@@ -59,7 +59,7 @@ export default async ({
 
   // Our actor document (including public key).
   // @todo: Support non-RSA keys.
-  router.get("/@king", ctx => {
+  router.get("/@king", (ctx) => {
     const actor = {
       "@context": [AS_CONTEXT, SEC_CONTEXT],
       id: actorUrl,
@@ -71,20 +71,20 @@ export default async ({
       icon: {
         type: "Image",
         mediaType: "image/png",
-        url: `${actorUrl}/icon`
+        url: `${actorUrl}/icon`,
       },
       attachment: [
         {
           type: "PropertyValue",
           name: "Website",
-          value: `<a href="${origin}/">${domain}</a>`
-        }
+          value: `<a href="${origin}/">${domain}</a>`,
+        },
       ],
       publicKey: {
         id: publicKeyUrl,
         owner: actorUrl,
-        publicKeyPem
-      }
+        publicKeyPem,
+      },
     };
 
     ctx.response.vary("accept");
@@ -99,7 +99,7 @@ export default async ({
   });
 
   // Our actor icon. Doubles as our favicon.
-  router.get("/@king/icon", ctx => {
+  router.get("/@king/icon", (ctx) => {
     ctx.body = kingIcon;
     ctx.type = "png";
   });

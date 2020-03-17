@@ -9,13 +9,13 @@ import { ensureArray } from "../util/misc";
 
 export interface SigningService {
   verify(ctx: Context, body: string, store: TripleStore): Promise<PublicKey>;
-  signHook(keyId: string, privateKeyPem: string): BeforeRequestHook<any>;
+  signHook(keyId: string, privateKeyPem: string): BeforeRequestHook;
 }
 
 type HeaderMap = Map<string, string[]>;
 
 export default async ({
-  domain
+  domain,
 }: {
   domain: string;
 }): Promise<SigningService> => {
@@ -43,16 +43,13 @@ export default async ({
     const sha256 = ensureArray(headers.digest || [])
       .join(",")
       .split(",")
-      .find(x => x.slice(0, 8) === "SHA-256=");
+      .find((x) => x.slice(0, 8) === "SHA-256=");
     if (!sha256) {
       throw createError(400, "Expected a Digest header with SHA-256");
     }
 
     // Validate the SHA256 hash.
-    const expected = crypto
-      .createHash("sha256")
-      .update(body)
-      .digest("base64");
+    const expected = crypto.createHash("sha256").update(body).digest("base64");
     if (sha256.slice(8) !== expected) {
       throw createError(400, "Digest mismatch");
     }
@@ -158,7 +155,7 @@ export default async ({
 
     // Build the signed data.
     const signedData = signedHeaders
-      .map(name => {
+      .map((name) => {
         const value =
           name === "(request-target)"
             ? `${ctx.method.toLowerCase()} ${ctx.path}`
@@ -179,24 +176,17 @@ export default async ({
     return publicKey;
   };
 
-  // Hook for `got` `beforeRequest` to sign a request using the given key..
-  const signHook: SigningService["signHook"] = (
-    keyId,
-    privateKeyPem
-  ) => options => {
+  // Hook for `got` `beforeRequest` to sign a request using the given key.
+  const signHook: SigningService["signHook"] = (keyId, privateKeyPem) => (
+    options
+  ) => {
     let body = options.body;
-    if (body && body._buffer) {
-      body = body._buffer;
-    }
-    if (typeof options.body !== "string" && !Buffer.isBuffer(body)) {
+    if (typeof body !== "string" && !Buffer.isBuffer(body)) {
       throw Error("Cannot sign streaming body");
     }
 
     // Hash the body.
-    const sha256 = crypto
-      .createHash("sha256")
-      .update(body)
-      .digest("base64");
+    const sha256 = crypto.createHash("sha256").update(body).digest("base64");
 
     // Create the `Digest` header.
     options.headers.digest = `SHA-256=${sha256}`;
@@ -209,8 +199,8 @@ export default async ({
     const signedData = [
       `(request-target): ${options.method.toLowerCase()} ${options.path}`,
       ...signedHeaders.map(
-        name => `${name.toLowerCase()}: ${options.headers[name]}`
-      )
+        (name) => `${name.toLowerCase()}: ${options.headers[name]}`
+      ),
     ].join("\n");
 
     // Sign the headers.
@@ -223,12 +213,12 @@ export default async ({
     // Create the `Signature` header.
     const signatureHeaders = [
       "(request-target)",
-      ...signedHeaders.map(name => name.toLowerCase())
+      ...signedHeaders.map((name) => name.toLowerCase()),
     ].join(" ");
     options.headers.signature = [
       `keyId="${keyId}"`,
       `headers="${signatureHeaders}"`,
-      `signature="${signature}"`
+      `signature="${signature}"`,
     ].join(",");
   };
 

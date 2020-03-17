@@ -81,7 +81,7 @@ export default async ({
   cache,
   hmacSecret,
   origin,
-  router
+  router,
 }: {
   cache: CacheService;
   hmacSecret: string;
@@ -117,7 +117,7 @@ export default async ({
     const move = match
       ? {
           from: match[1],
-          to: match[2]
+          to: match[2],
         }
       : undefined;
 
@@ -148,7 +148,7 @@ export default async ({
 
   // Draw a board state and return a PNG buffer.
   // Trusts input, assuming the HMAC signature was already verified.
-  const draw: DrawCtrl["draw"] = async slug => {
+  const draw: DrawCtrl["draw"] = async (slug) => {
     const { pieces, side, move } = decodeSlug(slug);
 
     // Create and configure the canvas.
@@ -302,7 +302,7 @@ export default async ({
   };
 
   // Serve a board drawing.
-  router.get("/images/:slug/:signature.png", async ctx => {
+  router.get("/images/:slug/:signature.png", async (ctx) => {
     const { slug, signature } = ctx.params;
 
     // Verify the HMAC signature.
@@ -319,7 +319,7 @@ export default async ({
       png = await draw(slug);
       console.log(`Created and cached drawing for board state '${slug}'`);
       // Async cache the image.
-      cache.draw.set(slug, png).catch(err => {
+      cache.draw.set(slug, png).catch((err) => {
         console.error(err);
       });
     }
@@ -353,20 +353,20 @@ export default async ({
     const urls = {
       boardImage: imageUrlFor(pieces, currentSide),
       boardImageWhite: imageUrlFor(pieces, "w"),
-      boardImageBlack: imageUrlFor(pieces, "b")
+      boardImageBlack: imageUrlFor(pieces, "b"),
     };
     return move
       ? {
           ...urls,
           moveImage: imageUrlFor(pieces, currentSide, move),
           moveImageWhite: imageUrlFor(pieces, "w", move),
-          moveImageBlack: imageUrlFor(pieces, "b", move)
+          moveImageBlack: imageUrlFor(pieces, "b", move),
         }
       : {
           ...urls,
           moveImage: urls.boardImage,
           moveImageWhite: urls.boardImageWhite,
-          moveImageBlack: urls.boardImageBlack
+          moveImageBlack: urls.boardImageBlack,
         };
   };
 

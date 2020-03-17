@@ -58,7 +58,7 @@ export default async (config: AppConfig): Promise<FrontApp> => {
 
   // Setup request handling.
   app.koa.use(app.router.routes()).use(app.router.allowedMethods());
-  app.koa.on("error", err => {
+  app.koa.on("error", (err) => {
     if (typeof err.status !== "number" || err.status > 499) {
       console.error(err);
     }

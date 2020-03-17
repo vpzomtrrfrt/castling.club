@@ -46,7 +46,7 @@ const DEFAULT_POSITION =
 
 const PAWN_OFFSETS = {
   [BLACK]: [16, 32, 17, 15],
-  [WHITE]: [-16, -32, -17, -15]
+  [WHITE]: [-16, -32, -17, -15],
 };
 
 const PIECE_OFFSETS = {
@@ -54,7 +54,7 @@ const PIECE_OFFSETS = {
   [BISHOP]: [-17, -15, 17, 15],
   [ROOK]: [-16, 1, 16, -1],
   [QUEEN]: [-17, -16, -15, 1, 17, 16, 15, -1],
-  [KING]: [-17, -16, -15, 1, 17, 16, 15, -1]
+  [KING]: [-17, -16, -15, 1, 17, 16, 15, -1],
 };
 
 const ATTACKS = words(`
@@ -73,7 +73,7 @@ const ATTACKS = words(`
    0  0 20  0  0  0  0 24  0  0  0  0 20  0  0  0
    0 20  0  0  0  0  0 24  0  0  0  0  0 20  0  0
   20  0  0  0  0  0  0 24  0  0  0  0  0  0 20
-`).map(v => parseInt(v, 10));
+`).map((v) => parseInt(v, 10));
 
 const RAYS = words(`
    17   0   0   0   0   0   0  16   0   0   0   0   0   0  15  0
@@ -91,7 +91,7 @@ const RAYS = words(`
     0   0 -15   0   0   0   0 -16   0   0   0   0 -17   0   0  0
     0 -15   0   0   0   0   0 -16   0   0   0   0   0 -17   0  0
   -15   0   0   0   0   0   0 -16   0   0   0   0   0   0 -17
-`).map(v => parseInt(v, 10));
+`).map((v) => parseInt(v, 10));
 
 const SHIFTS = {
   [PAWN]: 0,
@@ -99,7 +99,7 @@ const SHIFTS = {
   [BISHOP]: 2,
   [ROOK]: 3,
   [QUEEN]: 4,
-  [KING]: 5
+  [KING]: 5,
 };
 
 enum Flags {
@@ -109,7 +109,7 @@ enum Flags {
   EP_CAPTURE = 1 << 3,
   PROMOTION = 1 << 4,
   KSIDE_CASTLE = 1 << 5,
-  QSIDE_CASTLE = 1 << 6
+  QSIDE_CASTLE = 1 << 6,
 }
 
 const SHORT_FLAG_NAMES: [Flags, string][] = [
@@ -119,7 +119,7 @@ const SHORT_FLAG_NAMES: [Flags, string][] = [
   [Flags.EP_CAPTURE, "e"],
   [Flags.PROMOTION, "p"],
   [Flags.KSIDE_CASTLE, "k"],
-  [Flags.QSIDE_CASTLE, "q"]
+  [Flags.QSIDE_CASTLE, "q"],
 ];
 
 interface Move {
@@ -167,12 +167,12 @@ const SQUARES = words(`
 const ROOKS = {
   [WHITE]: [
     { square: SQUARES.a1, flag: Flags.QSIDE_CASTLE },
-    { square: SQUARES.h1, flag: Flags.KSIDE_CASTLE }
+    { square: SQUARES.h1, flag: Flags.KSIDE_CASTLE },
   ],
   [BLACK]: [
     { square: SQUARES.a8, flag: Flags.QSIDE_CASTLE },
-    { square: SQUARES.h8, flag: Flags.KSIDE_CASTLE }
-  ]
+    { square: SQUARES.h8, flag: Flags.KSIDE_CASTLE },
+  ],
 };
 
 const rank = (i: number): number => i >> 4;
@@ -351,7 +351,7 @@ export default (initialFen: string = DEFAULT_POSITION): Game => {
       flags,
       piece: fenType(fromSquare),
       captured: undefined,
-      promotion: undefined
+      promotion: undefined,
     };
 
     if (promotion) {
@@ -505,7 +505,7 @@ export default (initialFen: string = DEFAULT_POSITION): Game => {
     (): Set<Move> => {
       const us = turn;
       return new Set(
-        [...allMoves()].filter(move => tryMove(move, () => !kingAttacked(us)))
+        [...allMoves()].filter((move) => tryMove(move, () => !kingAttacked(us)))
       );
     }
   );
@@ -665,7 +665,7 @@ export default (initialFen: string = DEFAULT_POSITION): Game => {
       [BISHOP]: 0,
       [ROOK]: 0,
       [QUEEN]: 0,
-      [KING]: 0
+      [KING]: 0,
     };
     const bishops = [];
     let numPieces = 0;
@@ -724,7 +724,7 @@ export default (initialFen: string = DEFAULT_POSITION): Game => {
       halfMoves,
       moveNumber,
       fen,
-      trying
+      trying,
     };
 
     trying = true;
@@ -913,7 +913,7 @@ export default (initialFen: string = DEFAULT_POSITION): Game => {
         piece: matches[1],
         from: matches[2],
         to: matches[3],
-        promotion: matches[4]
+        promotion: matches[4],
       };
     }
 
@@ -955,7 +955,7 @@ export default (initialFen: string = DEFAULT_POSITION): Game => {
       san: moveToSan(uglyMove, false),
       to: algebraic(uglyMove.to),
       from: algebraic(uglyMove.from),
-      flags
+      flags,
     };
   };
 
@@ -978,7 +978,7 @@ export default (initialFen: string = DEFAULT_POSITION): Game => {
     },
 
     moves() {
-      return new Set([...legalMoves()].map(move => moveToSan(move, false)));
+      return new Set([...legalMoves()].map((move) => moveToSan(move, false)));
     },
 
     move(move) {
@@ -991,6 +991,6 @@ export default (initialFen: string = DEFAULT_POSITION): Game => {
       } else {
         return undefined;
       }
-    }
+    },
   };
 };

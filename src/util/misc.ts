@@ -19,7 +19,7 @@ const INVALID_TLDS = new Set([
   // RFC 6762
   "local",
   // RFC 7686
-  "onion"
+  "onion",
 ]);
 
 // https://url.spec.whatwg.org/#forbidden-host-code-point
@@ -54,7 +54,7 @@ export const sortBy = <T, S extends number>(
   return arr
     .map((_value, idx) => idx)
     .sort((a, b) => values[a] - values[b])
-    .map(idx => arr[idx]);
+    .map((idx) => arr[idx]);
 };
 
 // Detach an async function. The wrapped function returns a promise for
@@ -62,7 +62,7 @@ export const sortBy = <T, S extends number>(
 export const detach = <F extends AnyAsyncFunction>(
   fn: F
 ): ((...args: ArgumentsOf<F>) => Promise<void>) => async (...args) =>
-  fn(...args).then(exports.noop, err => {
+  fn(...args).then(exports.noop, (err) => {
     console.error(err);
   });
 
@@ -87,7 +87,7 @@ export const checkPublicUrl = (url: string): boolean => {
     !host ||
     !host.includes(".") ||
     isIPv4(host) ||
-    [...host].find(c => INVALID_HOST_CHARS.has(c))
+    [...host].find((c) => INVALID_HOST_CHARS.has(c))
   ) {
     return false;
   }

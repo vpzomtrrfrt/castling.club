@@ -46,53 +46,53 @@ export interface PublicKey {
 
 // Get an Actor from an RDF store.
 export const getActor = (store: TripleStore, id: string): Actor =>
-  store.with(id, get => ({
+  store.with(id, (get) => ({
     id,
     type: get(RDF("type"), node),
     preferredUsername: get(AS("preferredUsername"), englishText),
     inbox: get(LDP("inbox"), node),
-    endpoints: get(AS("endpoints"), node)
+    endpoints: get(AS("endpoints"), node),
   }));
 
 // Get Endpoints from an RDF store.
 export const getEndpoints = (store: TripleStore, id: string): Endpoints =>
-  store.with(id, get => ({
+  store.with(id, (get) => ({
     id,
-    sharedInbox: get(AS("sharedInbox"), node)
+    sharedInbox: get(AS("sharedInbox"), node),
   }));
 
 // Get an Activity from an RDF store.
 export const getActivity = (store: TripleStore, id: string): Activity =>
-  store.with(id, get => ({
+  store.with(id, (get) => ({
     id,
     type: get(RDF("type"), node),
     actor: get(AS("actor"), node),
-    object: get(AS("object"), node)
+    object: get(AS("object"), node),
   }));
 
 // Get an Object from an RDF store.
 export const getObject = (store: TripleStore, id: string): Object =>
-  store.with(id, get => ({
+  store.with(id, (get) => ({
     id,
     type: get(RDF("type"), node),
     attributedTo: get(AS("attributedTo"), node),
     inReplyTo: get(AS("inReplyTo"), node),
     content: get(AS("content"), englishText),
-    tags: get(AS("tag"), nodes)
+    tags: get(AS("tag"), nodes),
   }));
 
 // Get a Tag from an RDF store.
 export const getTag = (store: TripleStore, id: string): Tag =>
-  store.with(id, get => ({
+  store.with(id, (get) => ({
     id,
     type: get(RDF("type"), node),
-    href: get(AS("href"), node)
+    href: get(AS("href"), node),
   }));
 
 // Get a Public Key from an RDF store.
 export const getPublicKey = (store: TripleStore, id: string): PublicKey =>
-  store.with(id, get => ({
+  store.with(id, (get) => ({
     id,
     owner: get(SEC("owner"), node),
-    publicKeyPem: get(SEC("publicKeyPem"), anyText)
+    publicKeyPem: get(SEC("publicKeyPem"), anyText),
   }));

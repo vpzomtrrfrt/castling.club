@@ -4,7 +4,7 @@ import parse5, {
   DefaultTreeParentNode as ParentNode,
   DefaultTreeChildNode as ChildNode,
   DefaultTreeElement as Element,
-  DefaultTreeDocumentFragment as DocumentFragment
+  DefaultTreeDocumentFragment as DocumentFragment,
 } from "parse5";
 
 import { ensureArray } from "./misc";
@@ -48,13 +48,13 @@ export const createElement = (
 ) => ({
   name,
   attrs,
-  childNodes
+  childNodes,
 });
 
 const toFragment = (nodes: VNode | VNode[]): DocumentFragment => {
   const result: DocumentFragment = {
     nodeName: "#document-fragment",
-    childNodes: []
+    childNodes: [],
   };
   for (const childVNode of ensureArray(nodes)) {
     const childNode = toFragmentNode(childVNode, result);
@@ -75,7 +75,7 @@ const toFragmentNode = (
     const result: TextNode = {
       nodeName: "#text",
       value: node,
-      parentNode
+      parentNode,
     };
     return result;
   } else {
@@ -85,11 +85,11 @@ const toFragmentNode = (
       namespaceURI: "",
       attrs: [],
       parentNode,
-      childNodes: []
+      childNodes: [],
     };
     result.attrs = Object.entries(node.attrs).map(([name, value]) => ({
       name,
-      value: typeof value === "string" ? value : ""
+      value: typeof value === "string" ? value : "",
     }));
     for (const childVNode of ensureArray(node.childNodes)) {
       const childNode = toFragmentNode(childVNode, result);
@@ -113,6 +113,6 @@ export const createMention = (id: string, name: string): VNode =>
   h("span", { class: "h-card" }, [
     h("a", { class: "u-url mention", href: id }, [
       "@",
-      h("span", { class: "p-nickname" }, [`${name || "???"}`])
-    ])
+      h("span", { class: "p-nickname" }, [`${name || "???"}`]),
+    ]),
   ]);

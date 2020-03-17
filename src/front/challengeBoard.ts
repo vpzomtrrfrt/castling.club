@@ -10,7 +10,7 @@ import { sample } from "../util/misc";
 import {
   Pg,
   insertOrBumpChallengeBoard,
-  removeFromChallengeBoard
+  removeFromChallengeBoard,
 } from "../util/model";
 
 export interface ChallengeBoardCtrl {
@@ -21,14 +21,14 @@ export interface ChallengeBoardCtrl {
 export default async ({
   actorUrl,
   outbox,
-  pg
+  pg,
 }: {
   actorUrl: string;
   outbox: OutboxCtrl;
   pg: Pg;
 }): Promise<ChallengeBoardCtrl> => {
   // Handle a request to be added to the challenge board.
-  const handleRequest: ChallengeBoardCtrl["handleRequest"] = async object => {
+  const handleRequest: ChallengeBoardCtrl["handleRequest"] = async (object) => {
     await q.transact(pg, async () => {
       const { id, preferredUsername: name = "???" } = object.actor;
 
@@ -45,8 +45,8 @@ export default async ({
           sample(CONFIRMATIONS),
           now.valueOf() === rows[0].createdAt.valueOf()
             ? " You are now on the challenge board."
-            : " You have been bumped to the top of the challenge board."
-        ])
+            : " You have been bumped to the top of the challenge board.",
+        ]),
       ]);
 
       // Create the reply note.
@@ -57,13 +57,13 @@ export default async ({
         inReplyTo: object.id,
         to: [object.actor.id],
         content: replyContent,
-        tag: [{ type: "Mention", href: object.actor.id }]
+        tag: [{ type: "Mention", href: object.actor.id }],
       });
     });
   };
 
   // Handle a request to be removed from the challenge board.
-  const handleRemove: ChallengeBoardCtrl["handleRemove"] = async object => {
+  const handleRemove: ChallengeBoardCtrl["handleRemove"] = async (object) => {
     await q.transact(pg, async () => {
       const { id, preferredUsername: name = "???" } = object.actor;
 
@@ -79,7 +79,7 @@ export default async ({
         replyText = "You've been removed from the challenge board.";
       }
       const replyContent = render([
-        h("p", {}, [createMention(id, name), " ", replyText])
+        h("p", {}, [createMention(id, name), " ", replyText]),
       ]);
 
       // Create the reply note.
@@ -90,7 +90,7 @@ export default async ({
         inReplyTo: object.id,
         to: [object.actor.id],
         content: replyContent,
-        tag: [{ type: "Mention", href: object.actor.id }]
+        tag: [{ type: "Mention", href: object.actor.id }],
       });
     });
   };

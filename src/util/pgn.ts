@@ -1,7 +1,7 @@
 // Render a game as PGN.
 export const renderPgn = ({
   game,
-  origin
+  origin,
 }: {
   game: any;
   origin: string;
@@ -14,7 +14,7 @@ export const renderPgn = ({
     ["White", game.whiteActor],
     ["Black", game.blackActor],
     // @todo: Add Result
-    ["Permalink", game.id]
+    ["Permalink", game.id],
   ];
 
   const lines = [];

@@ -1,9 +1,9 @@
 import createDebug from "debug";
-import { Cache as GotCache } from "got";
+import { Store } from "keyv";
 
 import { Pg } from "../util/q";
 
-export interface CacheStore<T> extends GotCache {
+export interface CacheStore<T> extends Store<T> {
   get(id: string): Promise<T | undefined>;
   set(id: string, data: T): Promise<void>;
   delete(id: string): Promise<boolean>;
@@ -30,7 +30,7 @@ export default async ({ pg }: { pg: Pg }): Promise<CacheService> => {
           select data from ${name}
           where id = $1
         `,
-        values: [id]
+        values: [id],
       });
       if (rows.length !== 0) {
         debug(`HIT ${name}: ${id}`);
@@ -51,7 +51,7 @@ export default async ({ pg }: { pg: Pg }): Promise<CacheService> => {
           on conflict (id) do update
             set data = $2
         `,
-        values: [id, data]
+        values: [id, data],
       });
     },
 
@@ -63,7 +63,7 @@ export default async ({ pg }: { pg: Pg }): Promise<CacheService> => {
           delete from ${name}
           where id = $1
         `,
-        values: [id]
+        values: [id],
       });
       return rowCount !== 0;
     },
@@ -74,14 +74,14 @@ export default async ({ pg }: { pg: Pg }): Promise<CacheService> => {
         name: `clear ${name}`,
         text: `
           truncate table ${name}
-        `
+        `,
       });
-    }
+    },
   });
 
   // Create default stores.
   return {
     draw: createStore<Buffer>("draw_cache"),
-    http: createStore<string>("http_cache")
+    http: createStore<string>("http_cache"),
   };
 };

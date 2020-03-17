@@ -1,8 +1,8 @@
-import EventEmitter from "events";
 import Router from "@koa/router";
 import coBody from "co-body";
 import createDebug from "debug";
 import createError from "http-errors";
+import { EventEmitter } from "events";
 
 import { AS } from "../util/consts";
 import { JsonLdService } from "../shared/jsonld";
@@ -17,7 +17,7 @@ import {
   getActivity,
   getActor,
   getObject,
-  getTag
+  getTag,
 } from "../util/rdfModel";
 
 export interface ObjectExt extends Object {
@@ -36,7 +36,7 @@ export default async ({
   jsonld,
   pg,
   router,
-  signing
+  signing,
 }: {
   jsonld: JsonLdService;
   pg: Pg;
@@ -46,7 +46,7 @@ export default async ({
   const inbox = new EventEmitter();
 
   // Remote server submits to our inbox.
-  router.post("/inbox", async ctx => {
+  router.post("/inbox", async (ctx) => {
     const { raw, parsed } = await coBody.json(ctx.req, { returnRawBody: true });
 
     // Sanity check.
@@ -131,7 +131,7 @@ export default async ({
           ...object,
           actor: actor,
           contentText: extractText(object.content || ""),
-          mentions: new Set()
+          mentions: new Set(),
         };
         for (const tagId of object.tags) {
           // Assume these are also inlined in the JSON, and thus loaded.

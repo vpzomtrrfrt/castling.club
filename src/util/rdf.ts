@@ -106,35 +106,37 @@ export class TripleStore {
 }
 
 // Parse terms to a list of nodes.
-export const nodes: Parser<string[]> = terms =>
+export const nodes: Parser<string[]> = (terms) =>
   terms
     .filter(
-      term => term.termType === "NamedNode" || term.termType === "BlankNode"
+      (term) => term.termType === "NamedNode" || term.termType === "BlankNode"
     )
-    .map(term => term.value);
+    .map((term) => term.value);
 
 // Parse terms to a single node.
-export const node: Parser<string | undefined> = terms => nodes(terms)[0];
+export const node: Parser<string | undefined> = (terms) => nodes(terms)[0];
 
 // Parse terms to a string.
 //
 // The `languages` option is an array of languages to look for. It should
 // usually end with the empty string, which acts as a wildcard.
-export const text = (
-  ...languages: string[]
-): Parser<string | undefined> => terms => {
-  const literals = <Literal[]>terms.filter(term => term.termType === "Literal");
+export const text = (...languages: string[]): Parser<string | undefined> => (
+  terms
+) => {
+  const literals = <Literal[]>(
+    terms.filter((term) => term.termType === "Literal")
+  );
 
   const strings = literals.filter(
-    term => term.datatype.value === XML("string")
+    (term) => term.datatype.value === XML("string")
   );
   const langStrings = literals.filter(
-    term => term.datatype.value === RDF("langString")
+    (term) => term.datatype.value === RDF("langString")
   );
 
   for (const language of languages) {
     const result = language
-      ? langStrings.find(term => term.language === language)
+      ? langStrings.find((term) => term.language === language)
       : strings[0] || langStrings[0];
     if (result) {
       return result.value;

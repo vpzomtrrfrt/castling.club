@@ -1,8 +1,8 @@
 import Router from "@koa/router";
 import assert from "assert";
 import createDebug from "debug";
-import uuid from "uuid/v4";
 import leven from "leven";
+import { v4 as uuid } from "uuid";
 
 import createGame, { Game, PrettyMove } from "../util/chess";
 import { DrawCtrl } from "./draw";
@@ -24,7 +24,7 @@ import {
   KOA_JSON_ACCEPTS,
   SHORT_CACHE_SEC,
   UNICODE_BADGES,
-  UNICODE_PIECES
+  UNICODE_PIECES,
 } from "../util/consts";
 
 import {
@@ -37,7 +37,7 @@ import {
   insertGameObject,
   updateGame,
   getOutboxMovesByGame,
-  removeFromChallengeBoard
+  removeFromChallengeBoard,
 } from "../util/model";
 
 export interface GameCtrl {
@@ -58,7 +58,7 @@ const CHALLENGER_TYPES = new Set([AS("Person")]);
 const CHALLENGED_TYPES = new Set([
   AS("Person"),
   AS("Service"),
-  AS("Application")
+  AS("Application"),
 ]);
 
 const debug = createDebug("chess:game");
@@ -71,7 +71,7 @@ export default async ({
   origin,
   outbox,
   pg,
-  router
+  router,
 }: {
   actorUrl: string;
   domain: string;
@@ -83,7 +83,7 @@ export default async ({
   router: Router;
 }): Promise<GameCtrl> => {
   // Handle challenges, and start a new game if everything looks good.
-  const handleChallenge: GameCtrl["handleChallenge"] = async object => {
+  const handleChallenge: GameCtrl["handleChallenge"] = async (object) => {
     // Verify the actor is a type that can be issue challenges.
     const challengerActor = object.actor;
     if (!CHALLENGER_TYPES.has(challengerActor.type || "")) {
@@ -133,10 +133,10 @@ export default async ({
       whiteId: whiteActor.id,
       whiteName: whiteActor.preferredUsername || "???",
       blackId: blackActor.id,
-      blackName: blackActor.preferredUsername || "???"
+      blackName: blackActor.preferredUsername || "???",
     };
 
-    await transact(pg, async pg => {
+    await transact(pg, async (pg) => {
       const now = new Date();
 
       // Create the game record.
@@ -161,16 +161,16 @@ export default async ({
 
       // Finish up with a reply.
       await finishWithReply(pg, object, game, row, {
-        createdAt: now
+        createdAt: now,
       });
     });
   };
 
   // Handle replies to see if they belong to a game and contain a move.
   // Returns `true` if the object belongs to a game.
-  const handleReply: GameCtrl["handleReply"] = async object => {
+  const handleReply: GameCtrl["handleReply"] = async (object) => {
     let result = false;
-    await transact(pg, async pg => {
+    await transact(pg, async (pg) => {
       // Look up the game.
       const { rows: gameRows } = await getGameByObjectForUpdate(
         pg,
@@ -288,14 +288,14 @@ export default async ({
         `${row.badge} ♙ `,
         createMention(row.whiteId, row.whiteName),
         " vs. ♟ ",
-        createMention(row.blackId, row.blackName)
+        createMention(row.blackId, row.blackName),
       ];
 
       // Add the game URL to the setup note.
       const gameUrl = `${origin}/games/${row.id}`;
       line3 = [
         "View the full game at any time at: ",
-        h("a", { href: gameUrl }, [gameUrl])
+        h("a", { href: gameUrl }, [gameUrl]),
       ];
     }
 
@@ -309,7 +309,7 @@ export default async ({
         game.turn() === "w"
           ? createMention(row.whiteId, row.whiteName)
           : createMention(row.blackId, row.blackName),
-        "'s turn"
+        "'s turn",
       ];
       if (game.isInCheck()) {
         line2.push(" (Check)");
@@ -344,17 +344,17 @@ export default async ({
         {
           type: "Image",
           mediaType: "image/png",
-          url: images.moveImage
-        }
+          url: images.moveImage,
+        },
       ],
       tag: [
         { type: "Mention", href: row.whiteId },
-        { type: "Mention", href: row.blackId }
+        { type: "Mention", href: row.blackId },
       ],
       game: `${origin}/games/${row.id}`,
       san: move ? move.san : undefined,
       fen,
-      ...images
+      ...images,
     });
 
     // Mark our reply as related to the game.
@@ -370,9 +370,9 @@ export default async ({
     input: string
   ): Promise<void> => {
     // Get the 5 best matching moves, and turn them into text.
-    const moves = sortBy([...game.moves()], move => leven(input, move))
+    const moves = sortBy([...game.moves()], (move) => leven(input, move))
       .slice(0, 5)
-      .map(x => `'${x}'`);
+      .map((x) => `'${x}'`);
     assert(moves.length >= 1);
 
     const lastMove = moves.pop();
@@ -390,15 +390,15 @@ export default async ({
           "I can't make that work, I'm afraid.",
           "Does not compute!",
           "I don't know what to do with that.",
-          "A small misunderstanding."
+          "A small misunderstanding.",
         ]),
         " ",
         sample([
           `Perhaps you want ${movesText}?`,
           `Did you mean ${movesText}?`,
           `Maybe ${movesText}?`,
-          `Looking for ${movesText}?`
-        ])
+          `Looking for ${movesText}?`,
+        ]),
       ])
     );
 
@@ -412,7 +412,7 @@ export default async ({
       to: [actor.id],
       content: replyContent,
       tag: [{ type: "Mention", href: actor.id }],
-      game: `${origin}/games/${row.id}`
+      game: `${origin}/games/${row.id}`,
     });
 
     // Mark our reply as related to the game.
@@ -431,7 +431,7 @@ export default async ({
   };
 
   // Complete representation of a game.
-  router.get("/games/:id", async ctx => {
+  router.get("/games/:id", async (ctx) => {
     ctx.assert(UUID_REGEXP.test(ctx.params.id), 404, "Game not found");
 
     const { rows: gameRows } = await getGameById(pg, ctx.params.id);
@@ -441,9 +441,9 @@ export default async ({
     const { rows: moveRows } = await getOutboxMovesByGame(pg, gameRow.id);
     ctx.assert(moveRows.length >= 1);
 
-    const notes = moveRows.map(row => ({
+    const notes = moveRows.map((row) => ({
       ...row.object,
-      "@context": undefined
+      "@context": undefined,
     }));
     const game = {
       "@context": [AS_CONTEXT, CHESS_CONTEXT],
@@ -455,7 +455,7 @@ export default async ({
       whiteUsername: gameRow.whiteName,
       blackUsername: gameRow.blackName,
       setupNote: notes[0],
-      moves: notes.slice(1)
+      moves: notes.slice(1),
     };
 
     // Shorter cache for games that are in-progress.

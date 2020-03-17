@@ -1,7 +1,7 @@
 import Router from "@koa/router";
 import assert from "assert";
 import createDebug from "debug";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 import { ensureArray } from "../util/misc";
 import { extractText } from "../util/html";
@@ -12,7 +12,7 @@ import {
   AS_CONTEXT,
   AS_MIME,
   KOA_JSON_ACCEPTS,
-  SHORT_CACHE_SEC
+  SHORT_CACHE_SEC,
 } from "../util/consts";
 
 import {
@@ -23,7 +23,7 @@ import {
   getNextOutboxMoveId,
   getOutboxActivityById,
   getGameOverById,
-  insertDelivery
+  insertDelivery,
 } from "../util/model";
 
 export interface OutboxCtrl {
@@ -37,7 +37,7 @@ export default async ({
   domain,
   origin,
   pg,
-  router
+  router,
 }: {
   actorUrl: string;
   domain: string;
@@ -69,14 +69,14 @@ export default async ({
       object: id,
       to: object.to,
       cc: object.cc,
-      published: object.published
+      published: object.published,
     };
 
     // Collect addressees.
     const addressees = new Set([
       ...ensureArray(object.to),
       ...ensureArray(object.cc),
-      ...ensureArray(object.bcc)
+      ...ensureArray(object.bcc),
     ]);
 
     // Don't deliver to ourselves, or the special public endpoint.
@@ -96,7 +96,7 @@ export default async ({
 
     // Add to database deliveries.
     await Promise.all(
-      [...addressees].map(async addressee => {
+      [...addressees].map(async (addressee) => {
         const { rowCount } = await insertDelivery(pg, id, addressee, createdAt);
         assert.equal(rowCount, 1);
       })
@@ -109,7 +109,7 @@ export default async ({
   };
 
   // Fetch one of our objects.
-  router.get("/objects/:id", async ctx => {
+  router.get("/objects/:id", async (ctx) => {
     const id = `${origin}/objects/${ctx.params.id}`;
     const { rows } = await getOutboxObjectById(pg, id);
     ctx.assert(rows.length === 1, 404, "Object not found");
@@ -155,7 +155,7 @@ export default async ({
         domain,
         object,
         prevId,
-        nextId
+        nextId,
       });
       ctx.type = "html";
     } else if (ctx.accepts(KOA_JSON_ACCEPTS)) {
@@ -167,7 +167,7 @@ export default async ({
   });
 
   // Fetch the activity for one of our objects.
-  router.get("/objects/:id/activity", async ctx => {
+  router.get("/objects/:id/activity", async (ctx) => {
     const id = `${origin}/objects/${ctx.params.id}`;
     const { rows } = await getOutboxActivityById(pg, id);
     ctx.assert(rows.length === 1, 404, "Object not found");
