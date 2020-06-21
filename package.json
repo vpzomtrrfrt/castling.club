@@ -18,11 +18,12 @@
     "dotenv": "^8.1.0",
     "ejs": "^3.0.1",
     "got": "^10.6.0",
+    "http-errors": "^1.7.3",
     "jsonld": "^3.0.1",
     "koa": "^2.8.1",
     "leven": "^3.1.0",
     "parse5": "^5.0.0",
-    "pg": "^7.12.1",
+    "pg": "^8.2.1",
     "uuid": "^8.1.0"
   },
   "devDependencies": {
@@ -37,7 +38,7 @@
     "@types/mocha": "^7.0.2",
     "@types/node": "^14.0.12",
     "@types/parse5": "^5.0.2",
-    "@types/pg": "^7.11.1",
+    "@types/pg": "^7.14.3 ",
     "@types/uuid": "^8.0.0",
     "chai": "^4.2.0",
     "mocha": "^7.1.0",
@@ -47,8 +48,9 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
+    "start": "./tools/server.js",
+    "migrate": "./tools/migrate.js",
     "test": "mocha tools/test-chess.js",
-    "prepare": "tsc",
-    "fmt": "prettier --write 'src/**/*.ts' '{assets,tools}/**/*.{js,json,css}' './*.{js,json,md}'"
+    "fmt": "prettier --write 'src/**/*.ts' '{assets,tools}/**/*.{js,json,css}' './*.{json,md}'"
   }
 }

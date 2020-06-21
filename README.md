@@ -11,16 +11,13 @@ it! Send me a toot: [@kosinus@mastodon.social]
 ## How to run
 
 To run the app, you need [Node.js] (targeting 10.x) and [PostgreSQL] (targeting
-9.6.x). [Yarn] is also recommended, but optional.
+9.6 and up).
 
-First, install the Node.js library dependencies:
+First, install the dependencies and build the TypeScript code:
 
 ```sh
-# For development:
-yarn
-# For production:
-yarn --prod
-# Or use npm, if you don't have Yarn.
+./yarn.js install
+./yarn.js build
 ```
 
 Next, you should configure the app.
@@ -95,20 +92,20 @@ Now generate the signing key:
 Make sure the database exists in PostgreSQL, then create the schema:
 
 ```sh
-./tools/migrate.js up
+./yarn.js migrate up
 ```
 
 The app can now be started with:
 
 ```sh
-./server.js
+./yarn.js start
 ```
 
 Debug logging is provided by the [debug] module. For development,
 castling.club's own debug logging can be enabled using, for example:
 
 ```sh
-DEBUG='chess:*' ./server.js
+DEBUG='chess:*' ./yarn.js start
 ```
 
 ## Testing interaction in development

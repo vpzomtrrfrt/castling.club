@@ -28,8 +28,6 @@ const BASE_DIR = path.resolve(__dirname, "./migrations");
 
 const readdir = promisify(fs.readdir);
 
-dotenv.config();
-
 class Runner {
   private pg?: Client = undefined;
 
@@ -136,9 +134,9 @@ class Runner {
 export default Runner;
 
 export const cli = () => {
-  const main = async (): Promise<void> => {
-    require("dotenv").config();
+  dotenv.config();
 
+  const main = async (): Promise<void> => {
     const runner = new Runner();
     try {
       await runner.init();
@@ -171,7 +169,7 @@ export const cli = () => {
   };
 
   main().catch((err) => {
-    console.error(err.stack);
+    console.error(err);
     process.exit(1);
   });
 };

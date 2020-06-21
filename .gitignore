@@ -1,7 +1,13 @@
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
 /*.tgz
 /.env
 /dist
-/node_modules
 /signing-key
 /signing-key.pub
 /tsconfig.tsbuildinfo
